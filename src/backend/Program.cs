@@ -22,7 +22,7 @@ builder.Services
     .WithTracing(tracer => tracer
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
-        .AddConsoleExporter() // Enable OTEL console logging for debugging purposes
+        .AddConsoleExporter() // Enable OTEL console trace logging for debugging purposes
         .AddOtlpExporter())
     .ConfigureResource(resource => resource
         .AddService(
