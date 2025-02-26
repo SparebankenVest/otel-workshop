@@ -33,7 +33,6 @@ builder.Logging
         options.IncludeFormattedMessage = true;
         options.IncludeScopes = true;
         options.ParseStateValues = true;
-        options.AddOtlpExporter();
     });
 
 var app = builder.Build();
