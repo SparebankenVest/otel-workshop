@@ -3,9 +3,18 @@ const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumenta
 const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
 const { OTLPMetricExporter } = require('@opentelemetry/exporter-metrics-otlp-http');
 const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
+const { MeterProvider, PeriodicExportingMetricReader, ConsoleMetricExporter } = require('@opentelemetry/sdk-metrics');
+const { Resource } = require('@opentelemetry/resources');
+const { ATTR_SERVICE_NAME } = require('@opentelemetry/semantic-conventions');
 
 // Set up diagnostic logging
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
+
+const resource = Resource.default().merge(
+  new Resource({
+    [ATTR_SERVICE_NAME]: 'otel-workshop-frontend'
+  }),
+);
 
 // Read the OTel collector URL from environment variables
 const otelEndpoint = process.env.OTEL_COLLECTOR_URL;
@@ -31,6 +40,7 @@ const metricExporter = new OTLPMetricExporter({
 
 // Initialize the OpenTelemetry SDK
 const sdk = new NodeSDK({
+  resource: resource,
   traceExporter,
   metricExporter,
   instrumentations: [getNodeAutoInstrumentations()],
@@ -46,6 +56,24 @@ const sdk = new NodeSDK({
     console.error('Error starting OpenTelemetry SDK:', error);
   }
 })();
+
+// METRICS
+// Set up the metric reader
+const metricReader = new PeriodicExportingMetricReader({
+  exporter: new ConsoleMetricExporter(),
+
+  // Default is 60000ms (60 seconds). Set to 10 seconds for demonstrative purposes only.
+  exportIntervalMillis: 10000,
+});
+
+const myServiceMeterProvider = new MeterProvider({
+  resource: resource,
+  readers: [metricReader],
+});
+
+// Set this MeterProvider to be global to the app being instrumented.
+opentelemetry.metrics.setGlobalMeterProvider(myServiceMeterProvider);
+
 
 // Gracefully shut down the SDK on process exit
 process.on('SIGTERM', () => {
