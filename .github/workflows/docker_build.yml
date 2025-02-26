@@ -1,0 +1,95 @@
+name: build
+
+on:
+  workflow_call:
+    inputs:
+      IMAGE_NAME:
+        type: string
+        description: <Azure Container Registry Name> #Example "dokken.azurecr.io"
+        required: true
+      REGISTRY:
+        type: string
+        description: Azure Container registry Used #<app-name> #Example "spv-super-api"
+        default: 'dokken.azurecr.io'
+        required: false
+      DOCKERFILE:
+        type: string
+        description: Path to the Dockerfile to build
+        default: './Dockerfile'
+        required: false
+    secrets:
+      DOKKEN_CLIENT_ID:
+        description: 'Dokken username'
+        required: true
+      DOKKEN_CLIENT_SECRET:
+        description: 'Dokken Password'
+        required: true
+      GH_PKG_READ_TOKEN:
+          description: 'Github Packages Reader Token'
+          required: true
+
+permissions:
+  contents: write         # This is required for actions/checkout@v3
+  pull-requests: write    # This is required for commenting on PR
+
+jobs:
+  build:
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: |
+          echo "TIMESTAMP=$(git show -s --format=%ct $GITHUB_SHA)" >> $GITHUB_ENV
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ inputs.REGISTRY }}/${{ inputs.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=semver,pattern={{version}}
+            type=raw,value=branch-{{branch}}-{{sha}}-{{date 'X'}},enable=${{ github.event_name != 'pull_request'}}
+            type=raw,value=branch-{{branch}},enable=${{ github.event_name != 'pull_request'}}
+            type=sha,format=long,prefix=ci-,enable=${{ github.ref != format('refs/heads/{0}', 'main') }}
+            type=raw,value={{sha}}-${{ env.TIMESTAMP }},enable={{is_default_branch}}
+
+
+      - name: Auth to dokken.azurecr.io
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: dokken.azurecr.io
+          username: ${{ secrets.DOKKEN_CLIENT_ID }}
+          password: ${{ secrets.DOKKEN_CLIENT_SECRET }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and conditionally push
+        uses: docker/build-push-action@v6
+        env:
+          DOCKER_BUILDKIT: 1
+        with:
+          context: .
+          secrets: |
+            github_packages_read_token=${{ secrets.GH_PKG_READ_TOKEN }}
+          build-args: |
+            COMMIT_HASH=${{ github.sha }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          file: ${{ inputs.DOCKERFILE }}
+
+      - name: Output summary
+        run: |
+          echo '# Docker Metadata 🐳' >> $GITHUB_STEP_SUMMARY
+          echo '## Tags' >> $GITHUB_STEP_SUMMARY
+          echo '${{ steps.meta.outputs.tags }}' >> $GITHUB_STEP_SUMMARY
+          echo '## Labels' >> $GITHUB_STEP_SUMMARY
+          echo '${{ steps.meta.outputs.labels }}' >> $GITHUB_STEP_SUMMARY
