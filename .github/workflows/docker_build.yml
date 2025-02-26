@@ -24,9 +24,6 @@ on:
       DOKKEN_CLIENT_SECRET:
         description: 'Dokken Password'
         required: true
-      GH_PKG_READ_TOKEN:
-          description: 'Github Packages Reader Token'
-          required: true
 
 permissions:
   contents: write         # This is required for actions/checkout@v3
@@ -75,8 +72,6 @@ jobs:
           DOCKER_BUILDKIT: 1
         with:
           context: .
-          secrets: |
-            github_packages_read_token=${{ secrets.GH_PKG_READ_TOKEN }}
           build-args: |
             COMMIT_HASH=${{ github.sha }}
           push: ${{ github.event_name != 'pull_request' }}
