@@ -1,6 +1,7 @@
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,12 +15,15 @@ builder.Services
         .AddHttpClientInstrumentation()
         .AddRuntimeInstrumentation()
         .AddConsoleExporter() // Enable OTEL console metrics logging for debugging purposes
-        .AddOtlpExporter()
-    )
-    .WithLogging(config => config
+        .AddOtlpExporter())
+    .WithLogging(logs => logs
         .AddConsoleExporter() // Enable OTEL console logging for debugging purposes
-        .AddOtlpExporter()
-    )
+        .AddOtlpExporter())
+    .WithTracing(tracer => tracer
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddConsoleExporter() // Enable OTEL console logging for debugging purposes
+        .AddOtlpExporter())
     .ConfigureResource(resource => resource
         .AddService(
             serviceName: "plask-2025-otel-workshop",
