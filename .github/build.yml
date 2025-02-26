@@ -1,0 +1,18 @@
+name: Build and push Docker image
+
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - "**"
+
+jobs:
+  build:
+    uses: sparebankenvest/github-actions-pipelines/.github/workflows/docker_build.yaml@main
+    with:
+      IMAGE_NAME: ${{ vars.DOKKEN_REPO_NAME }}
+      DOCKERFILE: './src/backend/Dockerfile'
+    secrets:
+      DOKKEN_CLIENT_ID: ${{ secrets.DOKKEN_CLIENT_ID }}
+      DOKKEN_CLIENT_SECRET: ${{ secrets.DOKKEN_CLIENT_SECRET }}
