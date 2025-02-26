@@ -1,8 +1,10 @@
 # backend app
 
+A simple REST API written in C# using ASP.NET Core.
+
 ## Prerequisites
 
-- .NET 9
+- [.NET 9](https://dotnet.microsoft.com/en-us/download/dotnet)
 
 ## Run
 
