@@ -1,4 +1,5 @@
 using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,11 +9,17 @@ builder.Services.AddOpenApi();
 builder.Services
     .AddHttpContextAccessor()
     .AddOpenTelemetry()
-    .WithLogging(config =>
-    {
-        // config.AddOtlpExporter("<COLLECTOR_URL>"); // Uncomment to enable OTLP log export
-        config.AddConsoleExporter(); // Enable OTEL console logging for debugging purposes
-    })
+    .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddRuntimeInstrumentation()
+        .AddConsoleExporter() // Enable OTEL console metrics logging for debugging purposes
+        .AddOtlpExporter()
+    )
+    .WithLogging(config => config
+        .AddConsoleExporter() // Enable OTEL console logging for debugging purposes
+        .AddOtlpExporter()
+    )
     .ConfigureResource(resource => resource
         .AddService(
             serviceName: "plask-2025-otel-workshop",
@@ -51,9 +58,9 @@ app.MapGet("/weatherforecast", () =>
                     summaries[Random.Shared.Next(summaries.Length)]
                 ))
             .ToArray();
-        
+
         app.Logger.LogInformation("Returning weather forecast for {ForecastDays} days", forecast.Length);
-        
+
         return forecast;
     })
     .WithName("GetWeatherForecast");
