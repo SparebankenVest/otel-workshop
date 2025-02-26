@@ -1,0 +1,25 @@
+name: otel-workshop
+id: ari:cloud:compass:55cc1ee7-8682-4042-a227-951c72565e89:component/4c329750-b8ae-4f35-938d-3c3c28c42246/e7f3c328-6350-4cc2-b1dd-a9fc8ea86e6e
+description: Repository containing source code for frontend and backend apps used in OpenTelemetry-workshop at PLASK 2025.
+configVersion: 1
+typeId: SERVICE
+fields:
+  tier: 4
+links:
+  - name: null
+    type: REPOSITORY
+    url: https://github.com/SparebankenVest/otel-workshop
+relationships:
+  DEPENDS_ON: []
+labels:
+  - source:github
+customFields:
+  - name: Date of last security review
+    type: text
+    value: null
+  - name: Number of users
+    type: number
+    value: null
+  - name: Requires audit?
+    type: boolean
+    value: false
