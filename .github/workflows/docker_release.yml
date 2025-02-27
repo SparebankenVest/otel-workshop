@@ -5,8 +5,9 @@ on:
     inputs:
       IMAGE_NAME:
         type: string
-        description: <Azure Container Registry Name> #Example "dokken.azurecr.io"
-        required: true
+        description: otel-dotnet-backend-api #Example "dokken.azurecr.io"
+        default: 'otel-dotnet-backend-api'
+        required: false
       REGISTRY:
         type: string
         description: Azure Container registry Used #<app-name> #Example "spv-super-api"

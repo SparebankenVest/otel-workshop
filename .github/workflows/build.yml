@@ -11,8 +11,7 @@ jobs:
   build:
     uses: ./.github/workflows/docker_build.yml
     with:
-      IMAGE_NAME: ${{ vars.DOKKEN_REPO_NAME }}
-      DOCKERFILE: './src/backend/Dockerfile'
+      BUILD_CONTEXT: './src/backend/'
     secrets:
-      DOKKEN_CLIENT_ID: ${{ secrets.DOKKEN_CLIENT_ID }}
-      DOKKEN_CLIENT_SECRET: ${{ secrets.DOKKEN_CLIENT_SECRET }}
+      DOCKER_USERNAME: ${{ github.actor  }}
+      DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
