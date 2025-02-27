@@ -5,7 +5,8 @@ on:
     inputs:
       IMAGE_NAME:
         type: string
-        description: otel-dotnet-backend-api #Example "dokken.azurecr.io"
+        description: image name #Example "dokken.azurecr.io"
+        default: 'otel-dotnet-backend-api'
         required: false
       REGISTRY:
         type: string
