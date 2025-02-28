@@ -1,6 +1,6 @@
 {
-  "name": "node-frontend-app",
-  "version": "1.0.0",
+  "name": "otel-workshop-frontend",
+  "version": "0.0.1",
   "description": "",
   "main": "server.js",
   "scripts": {
