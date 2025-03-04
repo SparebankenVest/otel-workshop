@@ -12,10 +12,11 @@ import { registerInstrumentations } from '@opentelemetry/instrumentation';
 const traceExporter = new OTLPTraceExporter({
   url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT + '/v1/traces' || 'https://localhost:4318/v1/traces',
 });
+const BACKEND_URL = process.env.BACKEND_URL || 'https://localhost:8080';
 
 const traceProvider = new WebTracerProvider({
   resource: new Resource({                          // Define a custom resource attributes
-    [ATTR_SERVICE_NAME]: 'otel-workshop-frontend2',
+    [ATTR_SERVICE_NAME]: 'otel-workshop-frontend',
     [ATTR_SERVICE_VERSION]: '0.0.1',
   }),
   spanProcessors: [
