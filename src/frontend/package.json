@@ -2,21 +2,33 @@
   "name": "otel-workshop-frontend",
   "version": "0.0.1",
   "description": "",
-  "main": "server.js",
+  "main": "public/script.js",
   "scripts": {
-    "start": "OTEL_EXPORTER_OTLP_ENDPOINT=https://localhost:4317 node server.js"
+    "start": "npx parcel public/index.html --port 1234"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/auto-instrumentations-node": "^0.56.1",
-    "@opentelemetry/exporter-metrics-otlp-http": "^0.57.2",
+    "@opentelemetry/context-zone": "^1.30.1",
     "@opentelemetry/exporter-trace-otlp-http": "^0.57.2",
-    "@opentelemetry/instrumentation-http": "^0.57.2",
-    "@opentelemetry/resources": "^1.30.1",
-    "@opentelemetry/sdk-metrics": "^1.30.1",
-    "@opentelemetry/sdk-node": "^0.57.2",
-    "@opentelemetry/sdk-trace-node": "^1.30.1",
+    "@opentelemetry/instrumentation": "^0.57.2",
+    "@opentelemetry/instrumentation-document-load": "^0.44.1",
+    "@opentelemetry/instrumentation-user-interaction": "^0.44.1",
+    "@opentelemetry/sdk-trace-web": "^1.30.1",
     "@opentelemetry/semantic-conventions": "^1.30.0",
-    "express": "^4.17.1"
+    "concurrently": "^9.1.2",
+    "express": "^4.21.2",
+    "winston": "^3.17.0"
+  },
+  "@parcel/resolver-default": {
+    "packageExports": true
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.9",
+    "@babel/preset-env": "^7.26.9",
+    "babel-loader": "^10.0.0",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.0"
   }
 }
