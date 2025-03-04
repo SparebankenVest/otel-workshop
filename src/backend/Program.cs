@@ -10,26 +10,20 @@ using MongoDB.Bson;
 using Microsoft.Extensions.Configuration;
 
 
-    string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
 
         // Bygg konfigurasjon med støtte for miljøspesifikke appsettings
-        var config = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true)
-            .Build();
+   
 
 
 
 var builder = WebApplication.CreateBuilder(args);
-var mongoClient = new MongoClient(config.GetConnectionString("MongoDb"));
-var database = mongoClient.GetDatabase("otel-mongodb");
-var collection = database.GetCollection<BsonDocument>("facts");
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+
 
 
 builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
-builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
 builder.Services
     .AddHttpContextAccessor()
@@ -65,6 +59,11 @@ builder.Logging
 
 var app = builder.Build();
 
+var configuration = app.Services.GetRequiredService<IConfiguration>();
+
+var mongoClient = new MongoClient(configuration["ConnectionStrings:MongoDB"]);
+var database = mongoClient.GetDatabase("otel-mongodb");
+var collection = database.GetCollection<BsonDocument>("facts");
 
 
 
