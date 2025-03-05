@@ -11,10 +11,7 @@ using Microsoft.Extensions.Configuration;
 
 
 
-        // Bygg konfigurasjon med støtte for miljøspesifikke appsettings
-   
-
-
+// Bygg konfigurasjon med støtte for miljøspesifikke appsettings
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
@@ -32,6 +29,7 @@ builder.Services
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
         .AddRuntimeInstrumentation()
+        .AddprometheusExporter()
         // .AddConsoleExporter() // Enable OTEL console metrics logging for debugging purposes
         .AddOtlpExporter())
     .WithLogging(logs => logs
@@ -44,8 +42,9 @@ builder.Services
         .AddOtlpExporter())
     .ConfigureResource(resource => resource
         .AddService(
-            serviceName: "plask-2025-otel-workshop",
-            serviceVersion: "1.0.0"
+            serviceName: "otel-workshop-api",
+            serviceVersion: "0.0.1",
+            serviceType: "backend"
         ));
 
 builder.Logging
