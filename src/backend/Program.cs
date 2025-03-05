@@ -9,18 +9,9 @@ using MongoDB.Driver;
 using MongoDB.Bson;
 using Microsoft.Extensions.Configuration;
 
-
-
-        // Bygg konfigurasjon med støtte for miljøspesifikke appsettings
-   
-
-
-
+// Bygg konfigurasjon med støtte for miljøspesifikke appsettings
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-
-
-
 
 builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
@@ -44,8 +35,8 @@ builder.Services
         .AddOtlpExporter())
     .ConfigureResource(resource => resource
         .AddService(
-            serviceName: "plask-2025-otel-workshop",
-            serviceVersion: "1.0.0"
+            serviceName: "otel-workshop-api",
+            serviceVersion: "0.0.1"
         ));
 
 builder.Logging
@@ -58,18 +49,12 @@ builder.Logging
     });
 
 var app = builder.Build();
-
 var configuration = app.Services.GetRequiredService<IConfiguration>();
-
 var mongoClient = new MongoClient(configuration["ConnectionStrings:MongoDB"]);
 var database = mongoClient.GetDatabase("otel-mongodb");
 var collection = database.GetCollection<BsonDocument>("facts");
 
-
-
 app.MapOpenApi(); // GET openapi/v1.json
-
-
 
 app.MapHealthChecks("/health");
 
@@ -116,10 +101,8 @@ app.MapGet("/fact", async (ILogger<Program> logger) => {
             using var responseStream = await response.Content.ReadAsStreamAsync();
 
             // Deserialiser JSON-strengen til et C#-objekt asynkront
-          
             var  fact = await JsonSerializer.DeserializeAsync<Fact>(responseStream);
-            
-            
+
             // Returner det deserialiserte objektet
             return Results.Ok(fact);
         }
