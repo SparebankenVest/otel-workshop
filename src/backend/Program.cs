@@ -46,7 +46,7 @@ builder.Logging
         options.IncludeFormattedMessage = true;
         options.IncludeScopes = true;
         options.ParseStateValues = true;
-    });
+});
 
 var app = builder.Build();
 var configuration = app.Services.GetRequiredService<IConfiguration>();
@@ -70,9 +70,11 @@ app.MapGet("/fact/{id}", async (string id, ILogger<Program> logger) => {
 
         if (document == null)
         {
+            logger.LogWarning("Fact not found.");
             return Results.NotFound(new { message = "Fact not found." });
         }
 
+        logger.LogInformation("Fact retrieved: " + document["fact"].AsString);
         // Returner dokumentet
         return Results.Ok(new { id = document["_id"].AsObjectId.ToString(), fact = document["fact"].AsString });
     }
@@ -102,6 +104,7 @@ app.MapGet("/fact", async (ILogger<Program> logger) => {
 
             // Deserialiser JSON-strengen til et C#-objekt asynkront
             var  fact = await JsonSerializer.DeserializeAsync<Fact>(responseStream);
+            logger.LogInformation("Fact retrived: " + fact.Text);
 
             // Returner det deserialiserte objektet
             return Results.Ok(fact);
