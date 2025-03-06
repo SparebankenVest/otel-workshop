@@ -162,11 +162,8 @@ app.MapPost("/fact", async (HttpContext context, ILogger<Program> logger) => {
 // Returner en 403-feil
 app.MapGet("/error403", (HttpContext context) =>
 {
-    context.Response.StatusCode = 403;
-    return Results.Problem("Forbidden: You don't have permission to access this resource.");
+    return Results.Problem("Forbidden: You don't have permission to access this resource.", statusCode: 403);
 });
-
-
 
 
 app.Run();
