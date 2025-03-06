@@ -58,7 +58,6 @@ app.MapOpenApi(); // GET openapi/v1.json
 
 app.MapHealthChecks("/health");
 
-// Middleware for å håndtere 404-feil
 app.Use(async (context, next) =>
 {
     await next();
@@ -160,6 +159,12 @@ app.MapPost("/fact", async (HttpContext context, ILogger<Program> logger) => {
     }
 });
 
+// Returner en 403-feil
+app.MapGet("/error403", (HttpContext context) =>
+{
+    context.Response.StatusCode = 403;
+    return Results.Problem("Forbidden: You don't have permission to access this resource.");
+});
 
 
 
