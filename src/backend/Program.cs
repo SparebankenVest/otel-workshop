@@ -161,7 +161,8 @@ app.MapPost("/fact", async (HttpContext context, ILogger<Program> logger) => {
 
 app.MapGet("/error400", (HttpContext context) =>
 {
-    throw new HttpException(400, "Bad Request");
+    context.Response.StatusCode = 400;
+    return Results.Problem("Bad Request");
 });
 
 
