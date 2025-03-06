@@ -58,6 +58,18 @@ app.MapOpenApi(); // GET openapi/v1.json
 
 app.MapHealthChecks("/health");
 
+// Middleware for å håndtere 404-feil
+app.Use(async (context, next) =>
+{
+    await next();
+    // Hvis responsen er 404 og ikke har startet, returner en JSON-feilmelding
+    if (context.Response.StatusCode == 404 && !context.Response.HasStarted)
+    {
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsync(JsonSerializer.Serialize(new { message = "Page not found." }));
+    }
+});
+
 app.MapGet("/fact/{id}", async (string id, ILogger<Program> logger) => {
     try
     {
