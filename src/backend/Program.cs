@@ -23,7 +23,7 @@ builder.Services
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
         .AddRuntimeInstrumentation()
-        // .AddConsoleExporter() // Enable OTEL console metrics logging for debugging purposes
+        .AddConsoleExporter() // Enable OTEL console metrics logging for debugging purposes
         .AddOtlpExporter())
     .WithLogging(logs => logs
         .AddConsoleExporter() // Enable OTEL console logging for debugging purposes
