@@ -1,0 +1,11 @@
+services:
+  backend:
+    build: ./src/backend
+    # environment:
+    #   - ASPNETCORE_ENVIRONMENT=Test
+    ports:
+      - "8080:8080"
+  # frontend:
+  #   build: /src/frontend .
+  database:
+    image: "mongo"
