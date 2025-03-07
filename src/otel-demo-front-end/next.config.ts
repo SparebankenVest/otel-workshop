@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 10f0551 (remove whitespaces)
     async headers() {
         return [
             {
@@ -16,6 +19,7 @@ const nextConfig: NextConfig = {
             }
         ]
     }
+<<<<<<< HEAD
 =======
   async headers() {
     return [
@@ -31,6 +35,8 @@ const nextConfig: NextConfig = {
     ]
 }
 >>>>>>> d2a5556 (nextjs WIP)
+=======
+>>>>>>> 10f0551 (remove whitespaces)
 };
 
 export default nextConfig;

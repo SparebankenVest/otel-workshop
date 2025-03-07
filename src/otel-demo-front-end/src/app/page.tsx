@@ -31,6 +31,13 @@ export default function Home() {
         })));
         console.log(response);
         console.log(fact);
+
+
+      //    const responseData = await response.json(); // Henter JSON-svar fra serveren
+        //  console.log('Response from server:', responseData);
+
+
+
     } catch (error) {
       console.error(error);
     }
