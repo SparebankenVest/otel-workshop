@@ -16,37 +16,35 @@ builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnC
 builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
 
+// Sett opp OpenTelemetry med støtte for logging, tracing og metrics
 builder.Services
     .AddHttpContextAccessor()
     .AddOpenTelemetry()
-    .WithMetrics(metrics => metrics
-        .AddAspNetCoreInstrumentation()
-        .AddHttpClientInstrumentation()
-        .AddRuntimeInstrumentation()
-        .AddConsoleExporter() // Enable OTEL console metrics logging for debugging purposes
-        .AddOtlpExporter())
     .WithLogging(logs => logs
-        .AddConsoleExporter() // Enable OTEL console logging for debugging purposes
-        .AddOtlpExporter())
+        .ClearProviders()               // Fjern alle standard logger-providere (f.eks. Console, Debug, EventSource, etc.). Ikke nødvendig hvis du vil beholde disse.
+        //.AddConsoleExporter()         // Skru på OTEL console logging for debugging
+        .AddOtlpExporter())             // Skru på OTEL OTLP exporter for å sende data til OTEL Collector
+    .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation() // Auto instrumenter ASP.NET Core-metrikk (innkommende traffikk)
+        .AddHttpClientInstrumentation() // Auto instrumenter HTTP-klientmetrikk (utgående trafikk)
+        .AddRuntimeInstrumentation()
+        // .AddConsoleExporter()        // Skru på OTEL console logging for debugging
+        .AddOtlpExporter())             // Skru på OTEL OTLP exporter for å sende data til OTEL Collector
     .WithTracing(tracer => tracer
-        .AddAspNetCoreInstrumentation()
-        .AddHttpClientInstrumentation()
-        // .AddConsoleExporter() // Enable OTEL console trace logging for debugging purposes
-        .AddOtlpExporter())
+        .AddAspNetCoreInstrumentation() // Auto instrumenter ASP.NET Core-tracing (innkommende trafikk)
+        .AddHttpClientInstrumentation() // Auto instrumenter HTTP-klienttracing (utgående trafikk)
+        // .AddConsoleExporter() // Skru på OTEL console logging for debugging
+        .AddOtlpExporter())      // Skru på OTEL OTLP exporter for å sende data til OTEL Collector
     .ConfigureResource(resource => resource
         .AddService(
             serviceName: "otel-workshop-api",
-            serviceVersion: "0.0.1"
+            serviceVersion: "0.0.1",
         ));
 
-builder.Logging
-    .ClearProviders()
-    .AddOpenTelemetry(options =>
-    {
-        options.IncludeFormattedMessage = true;
-        options.IncludeScopes = true;
-        options.ParseStateValues = true;
-});
+// Custom Metrics
+// Sett opp meter og lag en counter metrikk
+var customMeter = new Meter("Otel.Workshop.Api");
+var factWordCounter = customMeter.CreateCounter<int>("otel.workshop.fact.word.count", description: "Counts the number of words in a fact");
 
 var app = builder.Build();
 var configuration = app.Services.GetRequiredService<IConfiguration>();
@@ -64,7 +62,7 @@ app.Use(async (context, next) =>
     // Hvis responsen er 404 og ikke har startet, returner en JSON-feilmelding
     if (context.Response.StatusCode == 404 && !context.Response.HasStarted)
     {
-        context.Response.ContentType = "application/json";
+        context.requesrt= "application/json";
         await context.Response.WriteAsync(JsonSerializer.Serialize(new { message = "Page not found." }));
     }
 });
@@ -84,10 +82,15 @@ app.MapGet("/fact/{id}", async (string id, ILogger<Program> logger) => {
             logger.LogWarning("Fact not found.");
             return Results.NotFound(new { message = "Fact not found." });
         }
+        fact = document["fact"].AsString;
+        logger.LogInformation("Fact retrieved: " + fact);
 
-        logger.LogInformation("Fact retrieved: " + document["fact"].AsString);
+        // METRIKK: tell antall ord i faktaet
+        var wordCount = fact.Split(' ').Length;
+        factWordCounter.Add(wordCount);
+
         // Returner dokumentet
-        return Results.Ok(new { id = document["_id"].AsObjectId.ToString(), fact = document["fact"].AsString });
+        return Results.Ok(new { id = document["_id"].AsObjectId.ToString(), fact = fact });
     }
     catch (Exception e)
     {
@@ -116,6 +119,10 @@ app.MapGet("/fact", async (ILogger<Program> logger) => {
             // Deserialiser JSON-strengen til et C#-objekt asynkront
             var  fact = await JsonSerializer.DeserializeAsync<Fact>(responseStream);
             logger.LogInformation("Fact retrived: " + fact.Text);
+
+            // METRIKK: tell antall ord i faktaet
+            var wordCount = fact.Text.Split(' ').Length;
+            factWordCounter.Add(wordCount);
 
             // Returner det deserialiserte objektet
             return Results.Ok(fact);
@@ -158,13 +165,6 @@ app.MapPost("/fact", async (HttpContext context, ILogger<Program> logger) => {
         return Results.Problem(e.Message);
     }
 });
-
-app.MapGet("/error400", (HttpContext context) =>
-{
-    context.Response.StatusCode = 400;
-    return Results.Problem("Bad Request");
-});
-
 
 app.Run();
 
