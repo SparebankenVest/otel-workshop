@@ -30,9 +30,10 @@ builder.Services
         //.AddConsoleExporter()         // Skru på OTEL console logging for debugging
         .AddOtlpExporter())             // Skru på OTEL OTLP exporter for å sende data til OTEL Collector
     .WithMetrics(metrics => metrics
+        .AddMeter("Otel.Workshop.Api")  // Opprett en ny meter for egendefinerte metrikker
         .AddAspNetCoreInstrumentation() // Auto instrumenter ASP.NET Core-metrikk (innkommende traffikk)
         .AddHttpClientInstrumentation() // Auto instrumenter HTTP-klientmetrikk (utgående trafikk)
-        .AddRuntimeInstrumentation()
+        .AddRuntimeInstrumentation()    // Auto instrumenter runtime-metrikk (CPU, minne, etc.)
         // .AddConsoleExporter()        // Skru på OTEL console logging for debugging
         .AddOtlpExporter())             // Skru på OTEL OTLP exporter for å sende data til OTEL Collector
     .WithTracing(tracer => tracer
