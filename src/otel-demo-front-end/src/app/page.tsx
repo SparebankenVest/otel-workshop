@@ -8,13 +8,13 @@ import { useState } from "react";
 export default function Home() {
   const [facts,setFacts] = useState([]);
   const [fact, setFact] = useState("");
-  
+
   function handleClick() {
     fetch("https://otel-api.svai.dev/fact")
       .then((res) => res.json())
       .then((data) => setFact(data.text));
       console.log(fact);
-  
+
 
   }
   async function saveFact() {
@@ -34,13 +34,13 @@ export default function Home() {
         })));
         console.log(response);
         console.log(fact);
-      
+
 
       //    const responseData = await response.json(); // Henter JSON-svar fra serveren
         //  console.log('Response from server:', responseData);
-        
 
-          
+
+
     } catch (error) {
       console.error(error);
     }
@@ -77,14 +77,7 @@ export default function Home() {
           </tbody>
         </table>
         </div>
-      <Button className="bg-blue-500 hover:bg-blue-700 text-black font-bold py-2 px-4 rounded" onClick={handleClick} >Fetch a random fact</Button> 
-     
-            
-            
-       
-     
-
-         
+      <Button className="bg-blue-500 hover:bg-blue-700 text-black font-bold py-2 px-4 rounded" onClick={handleClick} >Fetch a random fact</Button>
       </main>
     </div>
   );
