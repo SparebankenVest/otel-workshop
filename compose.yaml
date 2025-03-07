@@ -1,11 +1,20 @@
 services:
-  backend:
-    build: ./src/backend
-    # environment:
-    #   - ASPNETCORE_ENVIRONMENT=Test
-    ports:
-      - "8080:8080"
+  # backend:
+  #   build: ./src/backend
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Production
+  #     # - HTTP_PORT=8080
+  #     # - HTTPS_PORT=8443
+  #     # - OTEL_EXPORTER_OTLP_ENDPOINT=https://http.monitoring.svai.dev
+  #     # - OTEL_RESOURCE_ATTRIBUTES=k8s.service.name=otel-api
+  #     - ConnectionStrings__MongoDb=mongodb://mongodb:27017
+  #   ports:
+  #     - "8080:8080"
+    # depends_on:
+    #   - mongodb
   # frontend:
-  #   build: /src/frontend .
-  database:
-    image: "mongo"
+  #   build: ./src/frontend
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
