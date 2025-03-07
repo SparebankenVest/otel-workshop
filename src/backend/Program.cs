@@ -8,6 +8,10 @@ using System.Text.Json.Serialization;
 using MongoDB.Driver;
 using MongoDB.Bson;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Builder;
+using System.Diagnostics.Metrics;
 
 // Bygg konfigurasjon med støtte for miljøspesifikke appsettings
 var builder = WebApplication.CreateBuilder(args);
@@ -17,11 +21,12 @@ builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
 
 // Sett opp OpenTelemetry med støtte for logging, tracing og metrics
+
+builder.Logging.ClearProviders(); // Fjern alle standard logger-providere (f.eks. Console, Debug, EventSource, etc.). Ikke nødvendig hvis du vil beholde disse.
 builder.Services
     .AddHttpContextAccessor()
     .AddOpenTelemetry()
     .WithLogging(logs => logs
-        .ClearProviders()               // Fjern alle standard logger-providere (f.eks. Console, Debug, EventSource, etc.). Ikke nødvendig hvis du vil beholde disse.
         //.AddConsoleExporter()         // Skru på OTEL console logging for debugging
         .AddOtlpExporter())             // Skru på OTEL OTLP exporter for å sende data til OTEL Collector
     .WithMetrics(metrics => metrics
@@ -38,7 +43,7 @@ builder.Services
     .ConfigureResource(resource => resource
         .AddService(
             serviceName: "otel-workshop-api",
-            serviceVersion: "0.0.1",
+            serviceVersion: "0.0.1" // Removed the extra comma here
         ));
 
 // Custom Metrics
@@ -62,7 +67,7 @@ app.Use(async (context, next) =>
     // Hvis responsen er 404 og ikke har startet, returner en JSON-feilmelding
     if (context.Response.StatusCode == 404 && !context.Response.HasStarted)
     {
-        context.requesrt= "application/json";
+        context.Response.ContentType = "application/json";
         await context.Response.WriteAsync(JsonSerializer.Serialize(new { message = "Page not found." }));
     }
 });
@@ -82,7 +87,14 @@ app.MapGet("/fact/{id}", async (string id, ILogger<Program> logger) => {
             logger.LogWarning("Fact not found.");
             return Results.NotFound(new { message = "Fact not found." });
         }
-        fact = document["fact"].AsString;
+
+        var fact = document["fact"]?.AsString;
+        if (fact == null)
+        {
+            logger.LogWarning("Fact is null.");
+            return Results.NotFound(new { message = "Fact is null." });
+        }
+
         logger.LogInformation("Fact retrieved: " + fact);
 
         // METRIKK: tell antall ord i faktaet
@@ -117,7 +129,13 @@ app.MapGet("/fact", async (ILogger<Program> logger) => {
             using var responseStream = await response.Content.ReadAsStreamAsync();
 
             // Deserialiser JSON-strengen til et C#-objekt asynkront
-            var  fact = await JsonSerializer.DeserializeAsync<Fact>(responseStream);
+            var fact = await JsonSerializer.DeserializeAsync<Fact>(responseStream);
+            if (fact == null || fact.Text == null)
+            {
+                logger.LogWarning("Fact or fact text is null.");
+                return Results.NotFound(new { message = "Fact or fact text is null." });
+            }
+
             logger.LogInformation("Fact retrived: " + fact.Text);
 
             // METRIKK: tell antall ord i faktaet
@@ -142,6 +160,12 @@ app.MapPost("/fact", async (HttpContext context, ILogger<Program> logger) => {
     {
         // Les inn data fra forespørselsteksten
         var requestData = await context.Request.ReadFromJsonAsync<SaveRequest>();
+
+        if (requestData == null)
+        {
+            logger.LogWarning("Request data is null.");
+            return Results.BadRequest(new { message = "Request data is null." });
+        }
 
         // Logg data for feilsøking
         logger.LogInformation("Storing text: " + requestData);
