@@ -24,6 +24,8 @@ function getRandomEmoji(): string {
   return emojis[randomIndex];
 }
 
+
+
 // Font
 const font = Anton( { weight: "400", style: "normal", subsets: ["latin"] } );
 
@@ -36,30 +38,46 @@ export default function Home() {
       .then((data) => setFact(data.text));
       console.log(fact);
   }
+  const addFact = (newFact: { id: string; fact: string }) => {
+    setFacts((prevFacts) => [...prevFacts, newFact]);
+    console.log(facts);
+    console.log(fact);
+  };
+
+  const getFact = (id: string) => {
+    fetch(`https://otel-api.svai.dev/fact/${id}`, {
+      method: "GET",
+    })
+    .then((res) => res.json())
+    .then((data) => setFact(data.fact));
+    console.log(fact);
+  };
+
 
   async function saveFact() {
-    console.log("saveFact");
     try {
-      const response = fetch("https://otel-api.svai.dev/fact", {
+      const response: Response = await fetch("https://otel-api.svai.dev/fact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: "{\"fact\":\"" + fact + "\"}",
-      }).then((res) => res.json())
-        .then((data) => setFacts(facts => ({
-          ...facts,
-          fact: fact,
-          id: data.id,
-        })));
-      console.log(response);
-      console.log(fact);
+      });
+
+      if (response.ok){
+        console.log("Fact saved successfully");
+        const data = await response.json();
+        addFact({ id: data.id, fact: fact });
+
+
+      }
     } catch (error) {
       console.error(error);
     }
-    setFacts(facts => ({ ...facts, fact }));
-    console.log(facts);
+
   }
+
+
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -73,18 +91,43 @@ export default function Home() {
     <div className="container">
       <div className={font.className}>
         <h1 className="title">OpenTelemetry Workshop</h1>
-        <p className="subtitle">This is a Next.js app with OpenTelemetry instrumentation</p>
+        {fact !="" && (
         <div className="fact-section">
-          <h2 className="fact-title">Your latest fact</h2>
           <p className="fact-text">{fact}</p>
         </div>
+      )}
         <div className="button-section">
             <Button className="button" variant="contained" onClick={handleClick}>Get a new fact</Button>
         </div>
         <div style={{ margin: "20px 0" }}></div>
+        {fact !="" && (
         <div className="button-section">
             <Button className="button" variant="contained" onClick={saveFact}>Save fact</Button>
         </div>
+        )}
+      {facts.length>0 && (
+        <div className="fact-list">
+          <h2>Saved Facts</h2>
+      <table className="table-auto">
+        <thead>
+          <tr>
+            <th>Fact</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {facts.map((fact) => (
+            <tr key={fact.id}>
+              <td>{fact.fact}</td>
+              <td>
+                <button className="table-button" onClick={() => getFact(fact.id)}>Get fact</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+          </div>
+          )}
       </div>
     </div>
   );

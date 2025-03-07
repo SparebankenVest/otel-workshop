@@ -15,6 +15,10 @@ body {
   padding: 20px;
 }
 
+.hidden {
+  display: none;
+}
+
 .main {
   display: flex;
   flex-direction: column;
@@ -54,6 +58,18 @@ body {
   color: #FBBC05;
   margin-bottom: 20px;
 }
+.fact-list{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+
+  margin: 30px;
+  border: 1px solid #4285F4;
+  border-radius: 10px;
+  padding: 10px;
+  text-decoration-color: coral;
+}
 
 .button {
   background-color: darkgreen;
@@ -75,6 +91,8 @@ body {
   font-size: 2rem;
   animation: floatingEmoji 10s linear infinite;
 }
+
+
 
 @keyframes floatingEmoji {
   0% {
