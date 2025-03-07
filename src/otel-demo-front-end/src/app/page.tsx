@@ -81,21 +81,9 @@ export default function Home() {
         <div className="button-section">
             <Button className="button" variant="contained" onClick={handleClick}>Get a new fact</Button>
         </div>
-        <div className="relative overflow-x-auto">
-        <table className="table-auto max-h-px w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 ">
-        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-          <tr>
-            <th className="x-6 py-3">ID</th>
-            <th className="x-6 py-3">Fact</th>
-            <th className="x-6 py-3">Actions</th>
-          </tr>
-          </thead>
-          <tbody >
-          {facts.map((fact) => (
-          <tr><td>{fact.id}</td><td>{fact.fact}</td><td>"sas"</td></tr>
-        ))}
-          </tbody>
-        </table>
+        <div style={{ margin: "20px 0" }}></div>
+        <div className="button-section">
+            <Button className="button" variant="contained" onClick={saveFact}>Save fact</Button>
         </div>
       </div>
     </div>
