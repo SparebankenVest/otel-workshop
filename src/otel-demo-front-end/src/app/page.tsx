@@ -1,12 +1,34 @@
 "use client"
 
-import { Button } from "@/components/Button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Button } from "@mui/material";
+import { Anton } from "next/font/google";
+import "./styles.css";
 
+// Floating emoji animation
+const emojis: string[] = ['😊', '😂', '😍', '😎', '🤔', '😜', '😇', '🤩', '🥳', '😴'];
 
+function createFloatingEmoji() {
+  const emoji = document.createElement('div');
+  emoji.classList.add('emoji');
+  emoji.textContent = getRandomEmoji();
+  document.body.appendChild(emoji);
+
+  setTimeout(() => {
+    document.body.removeChild(emoji);
+  }, 10000); // 10s duration of the animation
+}
+
+function getRandomEmoji(): string {
+  const randomIndex = Math.floor(Math.random() * emojis.length);
+  return emojis[randomIndex];
+}
+
+// Font
+const font = Anton( { weight: "400", style: "normal", subsets: ["latin"] } );
 
 export default function Home() {
-  const [facts,setFacts] = useState([]);
+  const [facts, setFacts] = useState<{ id: string; fact: string }[]>([]);
   const [fact, setFact] = useState("");
   function handleClick() {
     fetch("https://otel-api.svai.dev/fact")
@@ -14,49 +36,50 @@ export default function Home() {
       .then((data) => setFact(data.text));
       console.log(fact);
   }
+
   async function saveFact() {
     console.log("saveFact");
     try {
-        const response = fetch("https://otel-api.svai.dev/fact", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: "{\"fact\":\""+fact+"\"}",
-        }).then((res) => res.json())
+      const response = fetch("https://otel-api.svai.dev/fact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: "{\"fact\":\"" + fact + "\"}",
+      }).then((res) => res.json())
         .then((data) => setFacts(facts => ({
           ...facts,
           fact: fact,
           id: data.id,
         })));
-        console.log(response);
-        console.log(fact);
-
-
-      //    const responseData = await response.json(); // Henter JSON-svar fra serveren
-        //  console.log('Response from server:', responseData);
-
-
-
+      console.log(response);
+      console.log(fact);
     } catch (error) {
       console.error(error);
     }
-    setFacts(facts => ({...facts, fact}));
-
+    setFacts(facts => ({ ...facts, fact }));
     console.log(facts);
   }
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <div>
-          <h1 className="text-4xl font-bold text-center">Welcome to the OpenTelemetry Workshop</h1>
-          <p className="text-lg text-center">This is a Next.js app with OpenTelemetry instrumentation</p>
-        </div>
-        <div className="relative overflow-x-auto">
-        <h2 className="text-2xl font-bold text-center">Your latest fact</h2>
-        <p className="text-lg text-center">{fact}</p>
-        <Button className="bg-blue-500 hover:bg-blue-700 text-black font-bold py-2 px-4 rounded" onClick={saveFact} >Save this fact</Button> 
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      createFloatingEmoji();
+    }, 20000); // every 5 minutes
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="container">
+      <div className={font.className}>
+        <h1 className="title">OpenTelemetry Workshop</h1>
+        <p className="subtitle">This is a Next.js app with OpenTelemetry instrumentation</p>
+        <div className="fact-section">
+          <h2 className="fact-title">Your latest fact</h2>
+          <p className="fact-text">{fact}</p>
+        </div>
+        <div className="button-section">
+            <Button className="button" variant="contained" onClick={handleClick}>Get a new fact</Button>
         </div>
         <div className="relative overflow-x-auto">
         <table className="table-auto max-h-px w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 ">
@@ -74,8 +97,7 @@ export default function Home() {
           </tbody>
         </table>
         </div>
-      <Button className="bg-blue-500 hover:bg-blue-700 text-black font-bold py-2 px-4 rounded" onClick={handleClick} >Fetch a random fact</Button>
-      </main>
+      </div>
     </div>
   );
 }
