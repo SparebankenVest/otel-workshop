@@ -156,6 +156,7 @@ app.MapGet("/fact", async (ILogger<Program> logger) => {
 });
 
 
+
 app.MapPost("/fact", async (HttpContext context, ILogger<Program> logger) => {
     try
     {
@@ -190,6 +191,103 @@ app.MapPost("/fact", async (HttpContext context, ILogger<Program> logger) => {
         return Results.Problem(e.Message);
     }
 });
+
+app.MapGet("/facts", async (ILogger<Program> logger) => {
+    try
+    {
+        // Hent alle dokumentene fra Cosmos DB
+        var documents = await collection.Find(new BsonDocument()).ToListAsync();
+
+        if (documents == null || documents.Count == 0)
+        {
+            logger.LogWarning("No facts found.");
+            return Results.NotFound(new { message = "No facts found." });
+        }
+
+        logger.LogInformation("Facts retrieved: " + documents.Count);
+
+        // Returner dokumentene
+        return Results.Ok(documents.Select(d => new { id = d["_id"].AsObjectId.ToString(), fact = d["fact"].AsString }));
+    }
+    catch (Exception e)
+    {
+        // Håndter feil
+        logger.LogError("Error retrieving facts: " + e.Message);
+        return Results.Problem(e.Message);
+    }
+});
+
+app.MapDelete("/fact/{id}", async (string id, ILogger<Program> logger) => {
+    try
+    {
+        // Konverter strengen til et ObjectId
+        var objectId = ObjectId.Parse(id);
+
+        // Slett dokumentet basert på ID
+        var filter = Builders<BsonDocument>.Filter.Eq("_id", objectId);
+        var result = await collection.DeleteOneAsync(filter);
+
+        if (result.DeletedCount == 0)
+        {
+            logger.LogWarning("Fact not found.");
+            return Results.NotFound(new { message = "Fact not found." });
+        }
+
+        logger.LogInformation("Fact deleted: " + id);
+
+        // Returner en suksessmelding
+        return Results.Ok(new { message = "Fact deleted successfully!" });
+    }
+    catch (Exception e)
+    {
+        // Håndter feil
+        logger.LogError("Error deleting fact: " + e.Message);
+        return Results.Problem(e.Message);
+    }
+});
+
+app.MapPut("/fact/{id}", async (string id, HttpContext context, ILogger<Program> logger) => {
+    try
+    {
+        // Konverter strengen til et ObjectId
+        var objectId = ObjectId.Parse(id);
+
+        // Les inn data fra forespørselsteksten
+        var requestData = await context.Request.ReadFromJsonAsync<SaveRequest>();
+
+        if (requestData == null)
+        {
+            logger.LogWarning("Request data is null.");
+            return Results.BadRequest(new { message = "Request data is null." });
+        }
+
+        // Logg data for feilsøking
+        logger.LogInformation("Updating text: " + requestData);
+
+        // Oppdater tekststrengen i Cosmos DB
+        var filter = Builders<BsonDocument>.Filter.Eq("_id", objectId);
+        var update = Builders<BsonDocument>.Update.Set("fact", requestData.Fact);
+        var result = await collection.UpdateOneAsync(filter, update);
+
+        if (result.ModifiedCount == 0)
+        {
+            logger.LogWarning("Fact not found.");
+            return Results.NotFound(new { message = "Fact not found." });
+        }
+
+        logger.LogInformation("Fact updated: " + id);
+
+        // Returner en suksessmelding
+        return Results.Ok(new { message = "Fact updated successfully!" });
+    }
+    catch (Exception e)
+    {
+        // Håndter feil
+        logger.LogError("Error updating text: " + e.Message);
+        return Results.Problem(e.Message);
+    }
+});
+
 
 app.Run();
 
