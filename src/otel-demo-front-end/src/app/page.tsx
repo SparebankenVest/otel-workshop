@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import { Button } from "@mui/material";
 import { Anton } from "next/font/google";
+import Link from 'next/link';
+import { FaUncharted } from 'react-icons/fa';  // Importer ikonet du vil bruke
+
 import "./styles.css";
 
 // Floating emoji animation
@@ -53,6 +56,23 @@ export default function Home() {
     console.log(fact);
   };
 
+  useEffect(() => {
+    // Funksjon for å hente fakta fra API-en
+    const fetchFacts = async () => {
+      try {
+        const response = await fetch('https://otel-api.svai.dev/facts');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        setFacts(data);
+      } catch (error) {
+        console.error('Error fetching facts:', error);
+      }
+    };
+
+    fetchFacts();
+  }, []); 
 
   async function saveFact() {
     try {
@@ -86,50 +106,21 @@ export default function Home() {
 
     return () => clearInterval(interval);
   }, []);
+  const handleChange = (event) => {
+    setFact(event.target.value);
+  };
+
 
   return (
-    <div className="container">
-      <div className={font.className}>
-        <h1 className="title">OpenTelemetry Workshop</h1>
-        {fact !="" && (
-        <div className="fact-section">
-          <p className="fact-text">{fact}</p>
-        </div>
-      )}
-        <div className="button-section">
-            <Button className="button" variant="contained" onClick={handleClick}>Get a new fact</Button>
-        </div>
-        <div style={{ margin: "20px 0" }}></div>
-        {fact !="" && (
-        <div className="button-section">
-            <Button className="button" variant="contained" onClick={saveFact}>Save fact</Button>
-        </div>
-        )}
-      {facts.length>0 && (
-        <div className="fact-list">
-          <h2>Saved Facts</h2>
-      <table className="table-auto">
-        <thead>
-          <tr>
-            <th>Fact</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {facts.map((fact) => (
-            <tr key={fact.id}>
-              <td>{fact.fact}</td>
-              <td>
-                <button className="table-button" onClick={() => getFact(fact.id)}>Get fact</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-          </div>
-          )}
-      </div>
-    </div>
+    
+    <h1 className="text-3xl font-bold underline">
+        <FaUncharted className="inline mr-2 text-brown-500" />  {/* Bruk ikonet her */}
+
+      
+    Hello OTEL !
+  </h1>
+
+
   );
 }
 
