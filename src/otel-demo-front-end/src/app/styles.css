@@ -1,5 +1,5 @@
 body {
-  background-color: black;
+  background-color: #11131d;
   margin: 0;
   padding: 0;
   display: flex;
@@ -27,62 +27,20 @@ body {
 }
 
 
-.title {
-  font-size: 3rem;
-  font-weight: bold;
-  color: #4285F4;
-  margin-bottom: 20px;
-}
 
-.subtitle {
-  font-size: 1.25rem;
-  color: #34A853;
-  margin-bottom: 40px;
-}
 
-.fact-section {
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-  margin-bottom: 20px;
-}
 
-.fact-title {
-  font-size: 1.5rem;
-  color: #EA4335;
-  margin-bottom: 10px;
-}
 
-.fact-text {
-  font-size: 1.25rem;
-  color: #FBBC05;
-  margin-bottom: 20px;
-}
-.fact-list{
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: center;
-
-  margin: 30px;
-  border: 1px solid #4285F4;
-  border-radius: 10px;
-  padding: 10px;
-  text-decoration-color: coral;
-}
-
-.button {
-  background-color: darkgreen;
-  border-radius: 8px;
-  color: white;
+button {
+  
+  border-radius: 20px;
   padding: 10px 20px;
+  margin: 20px;
   border: none;
   cursor: pointer;
 }
 
-.button:active {
-  background-color: grey;
-}
+
 
 .emoji {
   position: fixed;

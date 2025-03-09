@@ -1,11 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import { Button } from "@mui/material";
 
 
 import "../../styles.css";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 
 
@@ -13,19 +12,12 @@ interface Params {
   id: string;
 }
 
-export default function FactPage({ params }: { params: Params }) {
+export default function FactPage() {
   const [fact, setFact] = useState("");
   const router = useRouter();
-  const { id } = params
-  console.log(id);
+  const params = useParams();
+  const id = params.id;
 
-
-  function handleClick() {
-    fetch("https://otel-api.svai.dev/fact")
-      .then((res) => res.json())
-      .then((data) => setFact(data.text));
-      console.log(fact);
-  }
 
 
   useEffect(() => {
@@ -56,8 +48,8 @@ export default function FactPage({ params }: { params: Params }) {
 
   async function saveFact() {
     try {
-      const response: Response = await fetch("https://otel-api.svai.dev/fact", {
-        method: "POST",
+      const response: Response = await fetch(`https://otel-api.svai.dev/fact/${id}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
@@ -67,6 +59,8 @@ export default function FactPage({ params }: { params: Params }) {
       if (response.ok){
         console.log("Fact saved successfully");
         const data = await response.json();
+        window.alert(data.message);
+        router.push('/facts');
 
 
       }
@@ -114,18 +108,23 @@ export default function FactPage({ params }: { params: Params }) {
      
         {fact !="" && (
         <div className="fact-section">
-          <textarea value={fact.fact}         onChange={handleChange} rows="4" cols="25" className="fact-text"></textarea>
+          <textarea value={fact.fact}        
+           onChange={handleChange} rows="4" cols="65" 
+           className="bg-stone-950 rounded-lg shadow-md p-4 "></textarea>
         </div>
       )}
   
-        <div style={{ margin: "20px 0" }}></div>
-        {fact !="" && (
-        <div className="button-section">
-            <Button className="button" variant="contained" onClick={saveFact}>Save fact</Button>
-            <Button className="button" variant="contained" onClick={deleteFact}>Delete fact</Button>
-            
-        </div>
-        )}
+   
+        <button 
+        onClick={saveFact} 
+        className="bg-sky-500 text-white py-2 px-4 rounded hover:bg-sky-700 transition">
+        Update fact
+      </button>
+      <button 
+        onClick={deleteFact} 
+        className="bg-sky-500 text-white py-2 px-4 rounded hover:bg-sky-700 transition">
+        Delete fact
+      </button>
 
       </div>
   );
