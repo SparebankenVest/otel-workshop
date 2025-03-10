@@ -9,10 +9,12 @@ import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-docu
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
 import { ZoneContextManager } from '@opentelemetry/context-zone';
 import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
-import opentelemetry from '@opentelemetry/api';
+import opentelemetry, { trace } from '@opentelemetry/api';
 import { logs } from '@opentelemetry/api-logs';
+import { W3CTraceContextPropagator } from '@opentelemetry/core';
 import { LoggerProvider, SimpleLogRecordProcessor, ConsoleLogRecordExporter } from '@opentelemetry/sdk-logs';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
+
 
 export const initInstrumentation = () => {
   const resource = new Resource({
@@ -41,17 +43,21 @@ export const initInstrumentation = () => {
     ],
   });
 
+
   // initialize the provider
   provider.register({
     contextManager: new ZoneContextManager(),
+    propagator: new W3CTraceContextPropagator(), // Bruker W3C-propagator
   });
 
   // Register instrumentations / plugins
   registerInstrumentations({
     instrumentations: [
       new DocumentLoadInstrumentation(),
-      new FetchInstrumentation(),
-    ]
+      new FetchInstrumentation({
+        propagateTraceHeaderCorsUrls: /.*/, 
+        }),
+        ]
   });
 
   const otelMetricReader = new PeriodicExportingMetricReader({

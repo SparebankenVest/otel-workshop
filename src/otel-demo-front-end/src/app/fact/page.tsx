@@ -32,11 +32,13 @@ export default function FactPage() {
   }
 
   async function saveFact() {
+
+
     try {
       const response: Response = await fetch(`${apiUrl}/fact`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json" 
         },
         body: "{\"fact\":\"" + fact + "\"}",
       });

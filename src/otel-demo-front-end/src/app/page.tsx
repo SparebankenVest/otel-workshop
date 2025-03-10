@@ -23,6 +23,7 @@ export default function Home() {
   useEffect(() => {
     if (typeof window !== undefined) {
       initInstrumentation();
+      console.log('Instrumentation initialized');
     }
     const meter = metrics.getMeter('otel.workshop.client');
     const emojiCounter = meter.createCounter('emoji.count.total', {
