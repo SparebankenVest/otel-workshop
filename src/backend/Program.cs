@@ -38,6 +38,7 @@ builder.Services
         .AddOtlpExporter())             // Skru på OTEL OTLP exporter for å sende data til OTEL Collector
     .WithTracing(tracer => tracer
         .AddAspNetCoreInstrumentation() // Auto instrumenter ASP.NET Core-tracing (innkommende trafikk)
+        .AddMongoDbClientInstrumentation() // Auto instrumenter MongoDB-tracing
         .AddHttpClientInstrumentation() // Auto instrumenter HTTP-klienttracing (utgående trafikk)
         // .AddConsoleExporter() // Skru på OTEL console logging for debugging
         .AddOtlpExporter())      // Skru på OTEL OTLP exporter for å sende data til OTEL Collector
