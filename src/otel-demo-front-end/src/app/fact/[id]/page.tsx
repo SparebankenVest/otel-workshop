@@ -1,12 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react";
-
-
 import "../../styles.css";
 import { useParams, useRouter } from "next/navigation";
+import { logs, SeverityNumber } from '@opentelemetry/api-logs';
 
-
+const logger = logs.getLogger('otel.workshop.client');
 
 interface Params {
   id: string;
@@ -17,10 +16,7 @@ export default function FactPage() {
   const router = useRouter();
   const params = useParams();
   const apiUrl = process.env.API_URL;
-
   const id = params.id;
-
-
 
   useEffect(() => {
     if (id) {
@@ -31,13 +27,19 @@ export default function FactPage() {
             throw new Error('Network response was not ok');
           }
           const data = await response.json();
-          console.log(data);
+          logger.emit({
+            body: `Fetched fact with id: ${id}`,
+            severityNumber: SeverityNumber.INFO,
+          });
           setFact(data);
         } catch (error) {
+          logger.emit({
+            body: `Error fetching fact with id: ${id} - ${(error as Error).message}`,
+            severityNumber: SeverityNumber.ERROR,
+          });
           console.error('Error fetching fact:', error);
         }
       };
-
       fetchFact();
     }
   }, [id]);
@@ -45,8 +47,6 @@ export default function FactPage() {
   if (!fact) {
     return <div>Loading...</div>;
   }
-
-
 
   async function saveFact() {
     try {
@@ -59,25 +59,32 @@ export default function FactPage() {
       });
 
       if (response.ok){
-        console.log("Fact saved successfully");
         const data = await response.json();
+        logger.emit({
+          body: `Fact with id: ${id} saved successfully`,
+          severityNumber: SeverityNumber.INFO,
+        });
         window.alert(data.message);
         router.push('/facts');
-
-
       }
     } catch (error) {
+      logger.emit({
+        body: `Error saving fact with id: ${id} - ${(error as Error).message}`,
+        severityNumber: SeverityNumber.ERROR,
+      });
       console.error(error);
     }
-
   }
 
+  interface ChangeEvent {
+    target: {
+      value: string;
+    };
+  }
 
-
-  const handleChange = (event) => {
+  const handleChange = (event: ChangeEvent) => {
     setFact(event.target.value);
   };
-
 
   async function deleteFact() {
     try {
@@ -86,49 +93,47 @@ export default function FactPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        
       });
 
       if (response.ok){
         const data = await response.json();
+        logger.emit({
+          body: `Fact with id: ${fact.id} deleted successfully`,
+          severityNumber: SeverityNumber.INFO,
+        });
         window.alert(data.message);
         router.push('/facts');
- 
         console.log(data.message);
-
-
-
       }
     } catch (error) {
+      logger.emit({
+        body: `Error deleting fact with id: ${fact.id} - ${(error as Error).message}`,
+        severityNumber: SeverityNumber.ERROR,
+      });
       console.error(error);
     }
-
   }
 
   return (
     <div className="container">
-     
-        {fact !="" && (
+      {fact && (
         <div className="fact-section">
-          <textarea value={fact.fact}        
-           onChange={handleChange} rows="4" cols="65" 
-           className="bg-stone-950 rounded-lg shadow-md p-4 "></textarea>
+          <textarea value={fact.fact}
+            onChange={handleChange} rows="4" cols="65"
+            className="bg-stone-950 rounded-lg shadow-md p-4 "></textarea>
         </div>
       )}
-  
-   
-        <button 
-        onClick={saveFact} 
+      <button
+        onClick={saveFact}
         className="bg-sky-500 text-white py-2 px-4 rounded hover:bg-sky-700 transition">
         Update fact
       </button>
-      <button 
-        onClick={deleteFact} 
+      <button
+        onClick={deleteFact}
         className="bg-sky-500 text-white py-2 px-4 rounded hover:bg-sky-700 transition">
         Delete fact
       </button>
-
-      </div>
+    </div>
   );
 }
 
