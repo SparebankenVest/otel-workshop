@@ -13,10 +13,12 @@ import { useRouter } from "next/navigation";
 export default function FactPage() {
   const [fact, setFact] = useState("");
   const router = useRouter();
+  const apiUrl = process.env.API_URL;
+
 
 
   function getRandomFact() {
-    fetch("https://otel-api.svai.dev/fact")
+    fetch(`${apiUrl}/fact`)
       .then((res) => res.json())
       .then((data) => setFact(data.text));
       console.log(fact);
@@ -24,7 +26,7 @@ export default function FactPage() {
 
   async function saveFact() {
     try {
-      const response: Response = await fetch("https://otel-api.svai.dev/fact", {
+      const response: Response = await fetch(`${apiUrl}/fact`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
