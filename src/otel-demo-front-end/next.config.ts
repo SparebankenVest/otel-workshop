@@ -2,7 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-    async headers() {
+    env: {
+        API_URL: 'https://otel-api.svai.dev'
+    },
+      async headers() {
         return [
             {
                 // matching all API routes

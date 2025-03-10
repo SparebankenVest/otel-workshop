@@ -16,6 +16,8 @@ export default function FactPage() {
   const [fact, setFact] = useState("");
   const router = useRouter();
   const params = useParams();
+  const apiUrl = process.env.API_URL;
+
   const id = params.id;
 
 
@@ -24,7 +26,7 @@ export default function FactPage() {
     if (id) {
       const fetchFact = async () => {
         try {
-          const response = await fetch(`https://otel-api.svai.dev/fact/${id}`);
+          const response = await fetch(`${apiUrl}/fact/${id}`);
           if (!response.ok) {
             throw new Error('Network response was not ok');
           }
@@ -48,7 +50,7 @@ export default function FactPage() {
 
   async function saveFact() {
     try {
-      const response: Response = await fetch(`https://otel-api.svai.dev/fact/${id}`, {
+      const response: Response = await fetch(`${apiUrl}/fact/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -79,7 +81,7 @@ export default function FactPage() {
 
   async function deleteFact() {
     try {
-      const response: Response = await fetch(`https://otel-api.svai.dev/fact/${fact.id}`, {
+      const response: Response = await fetch(`${apiUrl}/fact/${fact.id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

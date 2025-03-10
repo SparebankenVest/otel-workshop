@@ -4,12 +4,14 @@ import { useEffect, useState } from 'react';
 
 export default function Home() {
   const [facts, setFacts] = useState([]);
+  const apiUrl = process.env.API_URL;
+
 
   useEffect(() => {
     // Funksjon for å hente fakta fra API-en
     const fetchFacts = async () => {
       try {
-        const response = await fetch('https://otel-api.svai.dev/facts');
+        const response = await fetch(`${apiUrl}/facts`);
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
