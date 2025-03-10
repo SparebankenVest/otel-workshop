@@ -8,6 +8,7 @@ using System.Text.Json.Serialization;
 using MongoDB.Driver;
 using MongoDB.Bson;
 using Microsoft.Extensions.Configuration;
+using MongoDB.Driver.Core.Extensions.DiagnosticSources;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Builder;
@@ -38,6 +39,7 @@ builder.Services
         .AddOtlpExporter())             // Skru på OTEL OTLP exporter for å sende data til OTEL Collector
     .WithTracing(tracer => tracer
         .AddAspNetCoreInstrumentation() // Auto instrumenter ASP.NET Core-tracing (innkommende trafikk)
+        .AddSource("MongoDB.Driver.Core.Events") 
         .AddHttpClientInstrumentation() // Auto instrumenter HTTP-klienttracing (utgående trafikk)
         // .AddConsoleExporter() // Skru på OTEL console logging for debugging
         .AddOtlpExporter())      // Skru på OTEL OTLP exporter for å sende data til OTEL Collector
