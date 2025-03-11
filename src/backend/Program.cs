@@ -133,7 +133,7 @@ app.MapGet("/fact", async (ILogger<Program> logger) => {
             string url = "https://uselessfacts.jsph.pl/api/v2/facts/random";
             if (ShouldTriggerError())
             {
-            url = "https://uselessfacts.jsph.pl/api/v2/facts/randoms"
+            url = "https://uselessfacts.jsph.pl/api/v2/facts/randoms";
             }
 
             // Angi URL-en til det eksterne endepunktet
