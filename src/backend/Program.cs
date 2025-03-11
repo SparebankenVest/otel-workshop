@@ -85,10 +85,16 @@ app.MapGet("/fact/{id}", async (string id, ILogger<Program> logger) => {
     {
         // Konverter strengen til et ObjectId
         var objectId = ObjectId.Parse(id);
+        FilterDefinition<BsonDocument> filter = FilterDefinition<BsonDocument>.Empty;
+        if (ShouldTriggerError())
+        {
+            filter = new BsonDocument("$fakeOperator", new BsonDocument { { "key", "value" } });      
+        }else{
+            filter = Builders<BsonDocument>.Filter.Eq("_id", objectId);
+        }
 
-        // Finn dokumentet basert på ID
-        var filter = Builders<BsonDocument>.Filter.Eq("_id", objectId);
-        var document = await collection.Find(filter).FirstOrDefaultAsync();
+        var    document = await collection.Find(filter).FirstOrDefaultAsync();
+
 
         if (document == null)
         {
@@ -124,8 +130,13 @@ app.MapGet("/fact", async (ILogger<Program> logger) => {
     {
         try
         {
-            // Angi URL-en til det eksterne endepunktet
             string url = "https://uselessfacts.jsph.pl/api/v2/facts/random";
+            if (ShouldTriggerError())
+            {
+            url = "https://uselessfacts.jsph.pl/api/v2/facts/randoms"
+            }
+
+            // Angi URL-en til det eksterne endepunktet
 
             // Send en GET-forespørsel til endepunktet
             HttpResponseMessage response = await client.GetAsync(url);
@@ -170,6 +181,10 @@ app.MapPost("/fact", async (HttpContext context, ILogger<Program> logger) => {
         // Les inn data fra forespørselsteksten
         var requestData = await context.Request.ReadFromJsonAsync<SaveRequest>();
 
+        if(ShouldTriggerError())
+        {
+            requestData = null;
+        }
         if (requestData == null)
         {
             logger.LogWarning("Request data is null.");
@@ -202,9 +217,19 @@ app.MapPost("/fact", async (HttpContext context, ILogger<Program> logger) => {
 app.MapGet("/facts", async (ILogger<Program> logger) => {
     try
     {
+        if (ShouldTriggerError())
+        {
+            throw new Exception("Simulert databasefeil!");
+        } else if (ShouldTriggerError())
+        {
+                        logger.LogWarning("No facts found.");
+
+            return Results.NotFound(new { message = "No facts found." });
+        }
+        
         // Hent alle dokumentene fra Cosmos DB
         var documents = await collection.Find(new BsonDocument()).ToListAsync();
-
+        
         if (documents == null || documents.Count == 0)
         {
             logger.LogWarning("No facts found.");
@@ -227,6 +252,10 @@ app.MapGet("/facts", async (ILogger<Program> logger) => {
 app.MapDelete("/fact/{id}", async (string id, ILogger<Program> logger) => {
     try
     {
+             if (ShouldTriggerError())
+        {
+            throw new Exception("Simulert databasefeil!");
+        }
         // Konverter strengen til et ObjectId
         var objectId = ObjectId.Parse(id);
 
@@ -256,6 +285,10 @@ app.MapDelete("/fact/{id}", async (string id, ILogger<Program> logger) => {
 app.MapPut("/fact/{id}", async (string id, HttpContext context, ILogger<Program> logger) => {
     try
     {
+             if (ShouldTriggerError())
+        {
+            throw new Exception("Simulert databasefeil!");
+        }
         // Konverter strengen til et ObjectId
         var objectId = ObjectId.Parse(id);
 
@@ -298,6 +331,12 @@ app.MapPut("/fact/{id}", async (string id, HttpContext context, ILogger<Program>
 
 app.Run();
 
+
+static bool ShouldTriggerError()
+{
+    Random random = new Random();
+    return random.NextDouble() < 0.3; // 20% sjanse for å returnere true
+}
 // Definer en modell som matcher JSON-strukturen
 public class Fact
 {
