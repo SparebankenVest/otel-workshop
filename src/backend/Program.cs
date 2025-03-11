@@ -219,13 +219,13 @@ app.MapGet("/facts", async (ILogger<Program> logger) => {
     {
         if (ShouldTriggerError())
         {
-            throw new Exception("Simulert databasefeil!");
-        } else if (ShouldTriggerError())
-        {
-                        logger.LogWarning("No facts found.");
-
-            return Results.NotFound(new { message = "No facts found." });
-        }
+            if(fiftyFiftyChance()){
+                throw new Exception("Simulert databasefeil!");
+            }else{
+                logger.LogWarning("No facts found.");
+                return Results.NotFound(new { message = "No facts found." });
+            }
+        } 
         
         // Hent alle dokumentene fra Cosmos DB
         var documents = await collection.Find(new BsonDocument()).ToListAsync();
@@ -331,7 +331,11 @@ app.MapPut("/fact/{id}", async (string id, HttpContext context, ILogger<Program>
 
 app.Run();
 
-
+static bool fiftyFiftyChance()
+{
+    Random random = new Random();
+    return random.NextDouble() < 0.5; // 20% sjanse for å returnere true
+}
 static bool ShouldTriggerError()
 {
     Random random = new Random();

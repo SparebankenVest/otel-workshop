@@ -4,13 +4,19 @@ import { useState } from "react";
 import "../styles.css";
 import { useRouter } from "next/navigation";
 import { logs, SeverityNumber } from '@opentelemetry/api-logs';
-
+import { metrics, trace } from '@opentelemetry/api';
 const logger = logs.getLogger('otel.workshop.client');
 
 export default function FactPage() {
   const [fact, setFact] = useState("");
+  const [startTime, setStartTime] = useState(0)
   const router = useRouter();
   const apiUrl = process.env.API_URL;
+
+  const meter = metrics.getMeter('otel.workshop.client');
+  const typingDuration = meter.createHistogram('fact.typing.duration', {
+    description: 'Time spent typing a fact',
+  });
 
   function getRandomFact() {
     fetch(`${apiUrl}/fact`)
@@ -32,7 +38,12 @@ export default function FactPage() {
   }
 
   async function saveFact() {
-
+    if(startTime){
+      const endTime = performance.now();
+      const duration = endTime - startTime;
+      typingDuration.record(duration/1000); // convert to seconds
+    
+    }
 
     try {
       const response: Response = await fetch(`${apiUrl}/fact`, {
@@ -62,6 +73,9 @@ export default function FactPage() {
   }
 
   const handleChange = (event) => {
+    if(!startTime){
+      setStartTime(performance.now());
+    }
     setFact(event.target.value);
   };
 
