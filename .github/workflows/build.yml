@@ -7,8 +7,9 @@ on:
     tags:
       - "**"
     paths-ignore:
-      - 'tasks/*'
+      - '**/docs/**'
       - '**/*.md'
+      - '*.md'
 
 jobs:
   build:
