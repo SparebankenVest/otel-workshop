@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { logs, SeverityNumber } from '@opentelemetry/api-logs';
 
+
 const logger = logs.getLogger('otel.workshop.client');
 
 export default function Home() {

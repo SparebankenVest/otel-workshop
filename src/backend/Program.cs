@@ -39,7 +39,7 @@ builder.Services
         .AddOtlpExporter())             // Skru på OTEL OTLP exporter for å sende data til OTEL Collector
     .WithTracing(tracer => tracer
         .AddAspNetCoreInstrumentation() // Auto instrumenter ASP.NET Core-tracing (innkommende trafikk)
-        .AddSource("MongoDB.Driver.Core.Events") 
+        .AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources") 
         .AddHttpClientInstrumentation() // Auto instrumenter HTTP-klienttracing (utgående trafikk)
         // .AddConsoleExporter() // Skru på OTEL console logging for debugging
         .AddOtlpExporter())      // Skru på OTEL OTLP exporter for å sende data til OTEL Collector
@@ -56,7 +56,12 @@ var factWordCounter = customMeter.CreateCounter<int>("otel.workshop.fact.word.co
 
 var app = builder.Build();
 var configuration = app.Services.GetRequiredService<IConfiguration>();
-var mongoClient = new MongoClient(configuration["ConnectionStrings:MongoDB"]);
+
+var clientSettings = MongoClientSettings.FromUrl(new MongoUrl(configuration["ConnectionStrings:MongoDB"]));
+var options = new InstrumentationOptions { CaptureCommandText = true };
+clientSettings.ClusterConfigurator = cb => cb.Subscribe(new DiagnosticsActivityEventSubscriber(options));
+var mongoClient = new MongoClient(clientSettings);
+
 var database = mongoClient.GetDatabase("otel-mongodb");
 var collection = database.GetCollection<BsonDocument>("facts");
 
