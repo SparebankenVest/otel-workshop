@@ -26,37 +26,10 @@ body {
   align-items: center;
 }
 
-
-
-
-
-
 button {
-  
   border-radius: 20px;
   padding: 10px 20px;
   margin: 20px;
   border: none;
   cursor: pointer;
-}
-
-
-
-.emoji {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  font-size: 2rem;
-  animation: floatingEmoji 10s linear infinite;
-}
-
-
-
-@keyframes floatingEmoji {
-  0% {
-    transform: translateX(-50%) translateY(0);
-  }
-  100% {
-    transform: translateX(-50%) translateY(-100vh);
-  }
 }
