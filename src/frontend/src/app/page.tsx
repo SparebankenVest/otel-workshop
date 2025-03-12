@@ -6,41 +6,21 @@ import { FaUncharted } from 'react-icons/fa';  // Importer ikonet du vil bruke
 import "./styles.css";
 import { useRouter } from "next/navigation";
 import { initInstrumentation } from "../otel/instrumentation.client";
-import { metrics } from '@opentelemetry/api';
-import { createFloatingEmoji } from "../utils/emoji";
-
+import { metrics, Counter } from '@opentelemetry/api';
 
 // Font
-
-export default function Home() {
+export default function Home(buttonClickCounter: Counter) {
 
   const router = useRouter();
-  const buttonMeter = metrics.getMeter('otel.workshop.client');
-  const buttonClickCounter = buttonMeter.createCounter('button.clicks.total', {
-    description: 'Total number of button clicks',
-  });
 
   useEffect(() => {
     if (typeof window !== undefined) {
       initInstrumentation();
       console.log('Instrumentation initialized');
     }
-    const meter = metrics.getMeter('otel.workshop.client');
-    const emojiCounter = meter.createCounter('emoji.count.total', {
-      description: 'Total number of emojis displayed',
-    });
-    const interval = setInterval(() => {
-      createFloatingEmoji();
-      emojiCounter.add(1);
-    }, 60000*5); // every 5 minutes
-
-    return () => clearInterval(interval);
   }, []);
 
-
-
-  const handleNavigate = (path: string) => {
-    buttonClickCounter.add(1, { "path": path });
+  const handleNavigate = (path: string, buttonClickCounter: Counter) => {
     router.push(path);
   }
 
@@ -61,9 +41,6 @@ export default function Home() {
         Add new facts
       </button>
     </div>
-
-
-
   );
 }
 
