@@ -47,7 +47,7 @@ export const initInstrumentation = () => {
   // initialize the provider
   provider.register({
     contextManager: new ZoneContextManager(),
-    propagator: new W3CTraceContextPropagator(), // Bruker W3C-propagator
+ //   propagator: new W3CTraceContextPropagator(), // Bruker W3C-propagator
   });
 
   // Register instrumentations / plugins
@@ -55,7 +55,7 @@ export const initInstrumentation = () => {
     instrumentations: [
       new DocumentLoadInstrumentation(),
       new FetchInstrumentation({
-        propagateTraceHeaderCorsUrls: /.*/, 
+     //   propagateTraceHeaderCorsUrls: /.*/, 
         }),
         ]
   });
